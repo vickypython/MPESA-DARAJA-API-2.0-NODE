@@ -72,7 +72,7 @@ app.post("/stkPush", getAccessToken, async (req, res) => {
         PartyA: `254${phone}`,
         PartyB: shortCode,
         PhoneNumber: `254${phone}`,
-        CallBackURL: "https://eb20-41-81-86-240.ngrok-free.app/api/callbackPath",
+        CallBackURL: "/api/callbackPath",
         AccountReference: "Payment of X",
         TransactionDesc: "Test",
       },
@@ -83,7 +83,8 @@ app.post("/stkPush", getAccessToken, async (req, res) => {
       }
     )
     .then((response) => {
-      console.log(response.data);
+      //whatever you get here is the response body if the push was successful with the merchant id,response and the others
+      //  console.log(response.data);
       res.status(200).json(response.data);
     })
     .catch((error) => {
@@ -93,26 +94,39 @@ app.post("/stkPush", getAccessToken, async (req, res) => {
 });
 
 app.post("/api/callbackPath", async (req, res) => {
+  const callbackData=req.body
+  console.log(callbackData);
   
-  const callbackInformation = req.body.Body.stkCallback.callbackMetadata;
+  const callbackInformation = req.body.Body.callbackMetadata;
   if (!callbackInformation) {
-    console.log("The transaction diD NOT go as planned");
+    console.log("info:",callbackData);
     res.json("happy saf");
   }
-  const phone = callbackInformation.Item[4].value;
-  const amount = callbackInformation.Item[0].value;
-  const trx_id = callbackInformation.Item[1].value;
-  console.log(phone);
-  console.log(amount);
-  console.log(trx_id);
+  console.log("callback data:",callbackInformation);
+  
+  // const merchantRequestID = req.body.Body.stkCallback.MerchantRequestID;
+  // const checkoutRequestID = req.body.Body.stkCallback.CheckoutRequestID;
+  // const resultCode = req.body.Body.stkCallback.ResultCode;
+  // const resultDesc = req.body.Body.stkCallback.ResultDesc;
+  // // const phone = callbackInformation.Item[4].value;
+  // // const amount = callbackInformation.Item[0].value;
+  // // const trx_id = callbackInformation.Item[1].value;
+  // // console.log(phone);
+  // // console.log(amount);
+  // // console.log(trx_id);
+  
+  // console.log("MerchantRequestID:", merchantRequestID);
+  // console.log("CheckoutRequestID:", checkoutRequestID);
+  // console.log("ResultCode:", resultCode);
+  // console.log("ResultDesc:", resultDesc);
   //create a new instance of an object
-  const Payment =  new MpesaTutorial({
-    amount: amount,
-    phone: phone,
-    trx_id: trx_id,
-  });
-  const results = await Payment.save();
-  res.status(200).json({ message: "new Payment made successfully", transaction: results });
+//   const Payment =  new MpesaTutorial({
+//     amount: amount,
+//     phone: phone,
+//     trx_id: trx_id,
+//   });
+//   const results = await Payment.save().then(res=>console.log(res));
+//   res.status(200).json({ message: "new Payment made successfully",results });
 });
 
 server.listen(PORT, () => {

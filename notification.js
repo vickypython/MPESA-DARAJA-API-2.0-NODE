@@ -17,4 +17,4 @@ const notifSchema = new Schema(
   },
   { timestamp: true }
 );
-module.export = model("MpesaTutorial", notifSchema);
+module.export = model("Tutorial", notifSchema);
