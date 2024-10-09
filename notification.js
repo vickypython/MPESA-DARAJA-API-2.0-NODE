@@ -1,5 +1,4 @@
 const { Schema, model } = require("mongoose");
-
 const notifSchema = new Schema(
   {
     amount: {
@@ -17,4 +16,4 @@ const notifSchema = new Schema(
   },
   { timestamp: true }
 );
-module.export = model("Tutorial", notifSchema);
+module.exports = model("MpesaTutorial", notifSchema);

@@ -7,10 +7,11 @@ const app = express();
 const server = http.createServer(app);
 const axios = require("axios");
 const mongoose = require("mongoose");
+const MpesaTutorial = require("./notification");
 const PORT = process.env.PORT;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-const MpesaTutorial = require("./notification");
+
 const getAccessToken = async (_req, res, next) => {
   const consumerSecret = `${process.env.Mpesa_Secret}`;
   const consumerKey = `${process.env.Consumer_Key}`;
@@ -72,7 +73,7 @@ app.post("/stkPush", getAccessToken, async (req, res) => {
         PartyA: `254${phone}`,
         PartyB: shortCode,
         PhoneNumber: `254${phone}`,
-        CallBackURL: "/api/callbackPath",
+        CallBackURL: "https://be8e-41-81-16-94.ngrok-free.app/api/callbackPath",
         AccountReference: "Payment of X",
         TransactionDesc: "Test",
       },
@@ -95,42 +96,31 @@ app.post("/stkPush", getAccessToken, async (req, res) => {
 
 app.post("/api/callbackPath", async (req, res) => {
   const callbackData=req.body
-  console.log(callbackData);
-  
-  const callbackInformation = req.body.Body.callbackMetadata;
+  // console.log("callbackurl:",callbackData);
+  const callbackInformation = callbackData.Body.stkCallback.CallbackMetadata;
   if (!callbackInformation) {
     console.log("info:",callbackData);
     res.json("happy saf");
   }
   console.log("callback data:",callbackInformation);
-  
-  // const merchantRequestID = req.body.Body.stkCallback.MerchantRequestID;
-  // const checkoutRequestID = req.body.Body.stkCallback.CheckoutRequestID;
-  // const resultCode = req.body.Body.stkCallback.ResultCode;
-  // const resultDesc = req.body.Body.stkCallback.ResultDesc;
-  // // const phone = callbackInformation.Item[4].value;
-  // // const amount = callbackInformation.Item[0].value;
-  // // const trx_id = callbackInformation.Item[1].value;
-  // // console.log(phone);
-  // // console.log(amount);
-  // // console.log(trx_id);
-  
-  // console.log("MerchantRequestID:", merchantRequestID);
-  // console.log("CheckoutRequestID:", checkoutRequestID);
-  // console.log("ResultCode:", resultCode);
-  // console.log("ResultDesc:", resultDesc);
+  const amount = callbackInformation.Item[0].Value;
+  const trx_id = callbackInformation.Item[1].Value;
+  const phone = callbackInformation.Item[4].Value;
+  console.log("phone:",phone);
+  console.log("amount:",amount);
+  console.log("transId:",trx_id);
   //create a new instance of an object
-//   const Payment =  new MpesaTutorial({
-//     amount: amount,
-//     phone: phone,
-//     trx_id: trx_id,
-//   });
-//   const results = await Payment.save().then(res=>console.log(res));
-//   res.status(200).json({ message: "new Payment made successfully",results });
+  const Payment = new MpesaTutorial({
+    amount: amount,
+    phone: phone,
+    trx_id: trx_id,
+  });
+  const results = await Payment.save().then(res=>console.log("here are the crazy one:",res));
+  res.status(200).json({ message: "new Payment made successfully",results });  
 });
 
 server.listen(PORT, () => {
-  console.log(`server runnibg on port:http://localhost:${PORT}`);
+  console.log(`server running on port:http://localhost:${PORT}`);
 });
 
 const MONGO_URL = `mongodb+srv://vickymlucky:${process.env.MONGODB_PASSWORD}@cluster0.xaqfsym.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
